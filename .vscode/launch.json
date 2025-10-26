@@ -1,0 +1,33 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python Debugger: Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Python Debugger: Current File with Arguments",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": "${command:pickArgs}"
+        },
+        {
+            "name": "Python: recognizer.py (Safe Debug)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/recognizer.py",
+            "console": "integratedTerminal", // Use a real terminal, not internal debug console
+            "justMyCode": false, // Allow stepping into library code
+            "redirectOutput": true, // Important for large output/debug sessions
+            "subProcess": true, // Handles subprocesses properly (useful if libraries spawn)
+            "env": {
+                "PYTHONUNBUFFERED": "1"
+            }
+        }
+    ]
+}
