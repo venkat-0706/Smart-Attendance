@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>OTP Login - Smart Attendance</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: url('https://res.cloudinary.com/dhmixzenl/image/upload/v1751283051/login-bg_gwbfau.png') no-repeat center center fixed;
+      background-size: cover;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .login-container {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(14px);
+      border-radius: 20px;
+      padding: 40px;
+      width: 90%;
+      max-width: 420px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+      color: #fff;
+      text-align: center;
+    }
+
+    h2 { margin-bottom: 20px; font-size: 28px; text-shadow: 0 0 6px rgba(255, 255, 255, 0.5); }
+
+    input[type="email"], input[type="tel"] {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: none;
+      font-size: 16px;
+    }
+
+    .otp-boxes {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin: 20px 0;
+    }
+
+    .otp-boxes input {
+      width: 40px;
+      height: 50px;
+      font-size: 24px;
+      text-align: center;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #00c6ff;
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background 0.3s ease;
+    }
+
+    button:hover { background: #007acc; }
+
+    #otp-section { display: none; }
+    #message { margin-top: 15px; font-size: 14px; color: #ffe5e5; }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 24px;
+    }
+
+    .switch input { opacity: 0; width: 0; height: 0; }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 24px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px; width: 18px;
+      left: 3px; bottom: 3px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider { background-color: #00c6ff; }
+    input:checked + .slider:before { transform: translateX(26px); }
+
+    #loading-spinner { margin-top: 15px; display: none; }
+
+    .spinner {
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-top: 4px solid #00c6ff;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      animation: spin 1s linear infinite;
+      margin: auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    #timer { color: #ffd700; margin-top: 8px; }
+    #resend-btn { display: none; margin-top: 10px; background: #ffaa00; }
+
+    @media (max-width: 500px) {
+      .login-container { padding: 25px; }
+      h2 { font-size: 22px; }
+      input, button { font-size: 14px; }
+      .otp-boxes input { width: 36px; height: 46px; font-size: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container" data-aos="fade-up">
+    <h2>Login</h2>
+    <div style="margin-bottom: 20px;">
+      <label style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+        <span>Email</span>
+        <label class="switch">
+          <input type="checkbox" id="toggle-login" onchange="toggleLoginMethod()">
+          <span class="slider round"></span>
+        </label>
+        <span>Mobile</span>
+      </label>
+    </div>
+
+    <div id="input-section" data-aos="fade-right">
+      <input type="email" id="email" placeholder="Enter your email" />
+      <input type="tel" id="mobile" placeholder="Enter your mobile number" pattern="[0-9]{10}" style="display: none;" />
+      <button onclick="sendOTP()">Send OTP</button>
+      <div id="loading-spinner"><div class="spinner"></div></div>
+    </div>
+
+    <div id="otp-section" data-aos="fade-left">
+      <div class="otp-boxes">
+        <input type="text" maxlength="1" oninput="moveNext(this, 0)" onkeydown="handleBackspace(event, 0)">
+        <input type="text" maxlength="1" oninput="moveNext(this, 1)" onkeydown="handleBackspace(event, 1)">
+        <input type="text" maxlength="1" oninput="moveNext(this, 2)" onkeydown="handleBackspace(event, 2)">
+        <input type="text" maxlength="1" oninput="moveNext(this, 3)" onkeydown="handleBackspace(event, 3)">
+        <input type="text" maxlength="1" oninput="moveNext(this, 4)" onkeydown="handleBackspace(event, 4)">
+        <input type="text" maxlength="1" oninput="moveNext(this, 5)" onkeydown="handleBackspace(event, 5)">
+      </div>
+      <div id="timer"></div>
+      <button onclick="verifyOTP()">Verify OTP</button>
+      <button id="resend-btn" onclick="resendOTP()">🔁 Resend OTP</button>
+    </div>
+
+    <div id="message" data-aos="fade-up"></div>
+  </div>
+
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script>
+    AOS.init({ duration: 1000 });
+
+    let otpExpiresAt = null;
+    let countdownInterval = null;
+    let currentEmail = "";
+
+    function toggleLoginMethod() {
+      const isMobile = document.getElementById("toggle-login").checked;
+      document.getElementById("email").style.display = isMobile ? "none" : "block";
+      document.getElementById("mobile").style.display = isMobile ? "block" : "none";
+    }
+
+    function sendOTP(isResend = false) {
+      const email = document.getElementById("email").value.trim();
+      const message = document.getElementById("message");
+      const spinner = document.getElementById("loading-spinner");
+      const resendBtn = document.getElementById("resend-btn");
+
+      if (!email) {
+        message.innerText = "❗ Please enter email.";
+        return;
+      }
+
+      currentEmail = email;
+      spinner.style.display = "block";
+      message.innerText = "";
+      resendBtn.style.display = "none";
+      otpExpiresAt = new Date().getTime() + 60000; // 1 minute
+      startCountdown();
+
+      fetch('http://localhost:5000/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      }).then(res => res.json()).then(data => {
+        spinner.style.display = "none";
+        if (data.success) {
+          document.getElementById("otp-section").style.display = "block";
+          message.innerText = isResend ? "✅ OTP resent." : "✅ OTP sent.";
+        } else {
+          message.innerText = "❌ Failed to send OTP.";
+        }
+      }).catch(err => {
+        spinner.style.display = "none";
+        message.innerText = "❌ Server error.";
+      });
+    }
+
+    function resendOTP() {
+      sendOTP(true);
+    }
+
+    function startCountdown() {
+      const timer = document.getElementById("timer");
+      const resendBtn = document.getElementById("resend-btn");
+      clearInterval(countdownInterval);
+
+      countdownInterval = setInterval(() => {
+        const now = new Date().getTime();
+        const diff = otpExpiresAt - now;
+
+        if (diff <= 0) {
+          clearInterval(countdownInterval);
+          timer.innerText = "⛔ OTP expired.";
+          resendBtn.style.display = "block";
+        } else {
+          const seconds = Math.floor(diff / 1000);
+          timer.innerText = `⏳ Expires in: ${seconds}s`;
+        }
+      }, 1000);
+    }
+
+    function moveNext(current, index) {
+      const inputs = document.querySelectorAll('.otp-boxes input');
+      if (current.value.length === 1 && index < inputs.length - 1) {
+        inputs[index + 1].focus();
+        inputs[index + 1].select();
+      }
+    }
+
+    function handleBackspace(event, index) {
+      const inputs = document.querySelectorAll('.otp-boxes input');
+      if (event.key === "Backspace" && inputs[index].value === "" && index > 0) {
+        inputs[index - 1].focus();
+        inputs[index - 1].select();
+      }
+    }
+
+    function verifyOTP() {
+      const inputs = document.querySelectorAll('.otp-boxes input');
+      const enteredOTP = Array.from(inputs).map(input => input.value).join('');
+      const message = document.getElementById("message");
+
+      if (!enteredOTP || enteredOTP.length < 6) {
+        message.innerText = "❗ Enter the complete 6-digit OTP.";
+        return;
+      }
+
+      const now = new Date().getTime();
+      if (now > otpExpiresAt) {
+        message.innerText = "⛔ OTP expired. Please click resend.";
+        return;
+      }
+
+      fetch('http://localhost:5000/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: currentEmail, otp: enteredOTP })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          message.innerText = "✅ OTP verified. Redirecting...";
+          setTimeout(() => {
+            window.location.href = "/home";
+          }, 1000);
+        } else {
+          message.innerText = "❌ Incorrect OTP. Please try again.";
+        }
+      })
+      .catch(err => {
+        message.innerText = "❌ Verification failed. Try again.";
+      });
+    }
+  </script>
+</body>
+</html>

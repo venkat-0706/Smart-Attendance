@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Ai Powered Smart Attendance</title>
+  <link rel="icon" type="image/png" href="https://res.cloudinary.com/dhmixzenl/image/upload/v1754980852/download_4_-fotor-20250812121016_ouxqof.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: url('https://res.cloudinary.com/dhmixzenl/image/upload/v1751283051/login-bg_gwbfau.png') no-repeat center center fixed;
+      background-size: cover;
+      color: #fff;
+    }
+
+    .container {
+      padding: 30px;
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2.5em;
+      margin-bottom: 40px;
+      text-shadow: 0 0 6px rgba(255, 255, 255, 0.6);
+    }
+
+    .stats {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 50px;
+    }
+
+    .card {
+      flex: 1 1 220px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      text-align: center;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+      transition: transform 0.3s ease;
+    }
+
+    .card:nth-child(2) { border-bottom: 5px solid #28a745; }
+    .card:nth-child(3) { border-bottom: 5px solid #dc3545; }
+    .card:nth-child(4) { border-bottom: 5px solid #ffc107; }
+
+    .card:hover { transform: translateY(-5px); }
+
+    .card h2, .card p {
+      margin: 10px 0;
+      text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+    }
+
+    .card h2 { font-size: 2.2em; }
+    .card p { font-size: 1.1em; font-weight: bold; }
+
+    .table-wrapper {
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 40px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    h3 {
+      font-size: 1.4em;
+      margin-bottom: 20px;
+      text-shadow: 0 0 6px rgba(255, 255, 255, 0.6);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 1em;
+    }
+
+    th, td {
+      padding: 12px 15px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      text-align: center;
+    }
+
+    th {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      font-weight: bold;
+    }
+
+    .status-present {
+      background: rgba(40, 167, 69, 0.8);
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-weight: bold;
+      box-shadow: 0 0 6px rgba(40, 167, 69, 0.6);
+    }
+
+    .status-absent {
+      background: rgba(220, 53, 69, 0.8);
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-weight: bold;
+      box-shadow: 0 0 6px rgba(220, 53, 69, 0.6);
+    }
+
+    .download-section {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 30px;
+      margin-top: 40px;
+    }
+
+    .download-box, .send-box {
+      background: rgba(0,0,0,0.5);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+      flex: 1 1 320px;
+      min-width: 300px;
+    }
+
+    .download-btn {
+      background-color: #28a745;
+      color: white;
+      padding: 14px 30px;
+      font-size: 16px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      box-shadow: 0 0 12px rgba(40, 167, 69, 0.8);
+      transition: background 0.3s ease, transform 0.2s;
+      margin: 10px 0;
+    }
+
+    .download-btn:hover {
+      transform: scale(1.05);
+    }
+
+    .toggle-box {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 20px 0 10px;
+    }
+
+    .switch-label {
+      background: rgba(255,255,255,0.1);
+      padding: 8px 16px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .switch-label input {
+      display: none;
+    }
+
+    .switch-slider {
+      width: 50px;
+      height: 24px;
+      background: #ccc;
+      border-radius: 12px;
+      position: relative;
+      margin: 0 15px;
+      transition: background 0.3s;
+    }
+
+    .switch-slider::before {
+      content: "";
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.3s;
+    }
+
+    input:checked + .switch-slider::before {
+      transform: translateX(26px);
+    }
+
+    input:checked + .switch-slider {
+      background: #17a2b8;
+    }
+
+    .email-input {
+      display: none;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .email-input input {
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      width: 250px;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+
+    @media (max-width: 768px) {
+      .download-section { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container" data-aos="fade-up">
+    <h1>📊 Smart Attendance Dashboard</h1>
+
+    <div class="stats">
+      <div class="card"><h2>{{ total_students }}</h2><p>Total Students</p></div>
+      <div class="card"><h2 style="color: #28a745">{{ present_count }}</h2><p>Present</p></div>
+      <div class="card"><h2 style="color: #dc3545">{{ absent_count }}</h2><p>Absent</p></div>
+      <div class="card"><h2 style="color: #ffc107">{{ attendance_percent }}%</h2><p>Attendance %</p></div>
+    </div>
+
+    <div class="table-wrapper" id="present-section"><h3>✅ Present Students</h3>
+      <table id="present-table">
+        <thead><tr><th>Roll Number</th><th>Date</th><th>Time</th><th>Status</th></tr></thead>
+        <tbody>{% for row in present_records %}
+          <tr>
+            <td>{{ row['Roll Number'] }}</td>
+            <td>{{ row['Date'] }}</td>
+            <td>{{ row['Time'] }}</td>
+            <td><span class="status-present">Present</span></td>
+          </tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-wrapper" id="absent-section"><h3>❌ Absentees</h3>
+      <table id="absent-table">
+        <thead><tr><th>Roll Number</th><th>Date</th><th>Status</th></tr></thead>
+        <tbody>{% for row in absent_records %}
+          <tr>
+            <td>{{ row['Roll Number'] }}</td>
+            <td>{{ row['Date'] }}</td>
+            <td><span class="status-absent">Absent</span></td>
+          </tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Download + Send Section Side-by-Side -->
+    <div class="download-section">
+      <!-- Download Excel Box -->
+      <div class="download-box" data-aos="fade-right">
+        <button class="download-btn" style="background-color:#007bff" onclick="downloadExcel()">
+          📥 Download Attendance
+        </button>
+        <button class="download-btn" style="background-color:#007bff" onclick="downloadExcel1()">
+          ⏰ Late Comers Data
+        </button>
+        <button class="download-btn" style="background-color:#007bff" onclick="sendAlerts()">
+    🚨 Absenties Alerts
+</button>
+
+<script>
+async function sendAlerts() {
+    try {
+        const response = await fetch("/send_alerts", { method: "POST" });
+        const data = await response.json();
+        alert(data.message);  // ✅ Popup after sending
+    } catch (error) {
+        alert("❌ Failed to send alerts. Please try again.");
+    }
+}
+</script>
+
+
+        
+         <button class="download-btn" style="background-color:#007bff" onclick="downloadExcel2()">
+          📊 Analyze  Percentage
+        </button>
+
+      </div>
+
+      <!-- Send Email Box -->
+      <div class="send-box" data-aos="fade-left">
+        <div class="toggle-box">
+          <label class="switch-label">
+            HOD <input type="checkbox" id="toggleRecipient" onclick="toggleSwitch()">
+            <span class="switch-slider"></span> Faculty
+          </label>
+        </div>
+
+        <div class="email-input" id="emailInputDiv">
+          <input type="email" id="otherEmail" placeholder="Enter faculty email..." />
+          <br />
+          <button class="download-btn" style="background-color:#17a2b8" onclick="sendToEmail()">📤 Send to Faculty</button>
+        </div>
+
+        <div style="text-align:center;">
+          <button class="download-btn" id="sendHODBtn" style="background-color:#ffc107" onclick="sendToEmail(true)">
+            📤 Send to HOD
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+    AOS.init({ duration: 1000 });
+
+    function extractTableData(tableId) {
+      const table = document.getElementById(tableId);
+      const rows = Array.from(table.querySelectorAll('tr'));
+      return rows.map(row => Array.from(row.querySelectorAll('th, td')).map(cell => cell.innerText));
+    }
+
+    function downloadExcel() {
+      const presentData = extractTableData('present-table');
+      const presentWS = XLSX.utils.aoa_to_sheet(presentData);
+      const presentWB = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(presentWB, presentWS, 'Present Students');
+      XLSX.writeFile(presentWB, 'Present_Students_List.xlsx');
+
+      const absentData = extractTableData('absent-table');
+      const absentWS = XLSX.utils.aoa_to_sheet(absentData);
+      const absentWB = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(absentWB, absentWS, 'Absent Students');
+      XLSX.writeFile(absentWB, 'Absent_Students_List.xlsx');
+    }
+
+    function downloadExcel1() {
+      const table = document.getElementById('present-table');
+      const rows = table.querySelectorAll('tr');
+      const lateComers = [];
+
+      rows.forEach((row, index) => {
+        const cells = row.querySelectorAll('td, th');
+        const rowData = Array.from(cells).map(cell => cell.innerText.trim());
+        if (index === 0) {
+          lateComers.push(rowData);
+          return;
+        }
+        const timeStr = rowData[3];
+        if (isLate(timeStr)) {
+          lateComers.push(rowData);
+        }
+      });
+
+      if (lateComers.length <= 1) {
+        alert("No late comers found.");
+        return;
+      }
+
+      const ws = XLSX.utils.aoa_to_sheet(lateComers);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Late Comers');
+      XLSX.writeFile(wb, 'Late_comers_List.xlsx');
+    }
+
+    function isLate(timeStr) {
+      const [hourStr, minuteStr] = timeStr.split(':');
+      const hour = parseInt(hourStr);
+      const minute = parseInt(minuteStr);
+      return (hour > 9) || (hour === 9 && minute > 45);
+    }
+    
+
+    function toggleSwitch() {
+      const isChecked = document.getElementById('toggleRecipient').checked;
+      document.getElementById('emailInputDiv').style.display = isChecked ? 'block' : 'none';
+      document.getElementById('sendHODBtn').style.display = isChecked ? 'none' : 'inline-block';
+    }
+
+    function sendToEmail(isHOD = false) {
+      const email = isHOD ? '' : document.getElementById('otherEmail').value;
+      if (!isHOD && !email) {
+        alert("Please enter the faculty email.");
+        return;
+      }
+      fetch('/send-to-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          alert("\u2705 Email sent successfully!");
+        } else {
+          alert("\u274C Failed to send email: " + data.error);
+        }
+      })
+      .catch(err => alert("\u274C Error: " + err.message));
+    }
+
+    window.onload = () => {
+      document.getElementById("toggleRecipient").checked = false;
+      toggleSwitch();
+    };
+  </script>
+</body>
+</html>
